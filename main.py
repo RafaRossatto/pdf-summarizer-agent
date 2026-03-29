@@ -6,7 +6,7 @@ def main():
         assistant = StepFunAssistant()
         
         # Make a request
-        query = "What are the benefits of using Object-Oriented Programming?"
+        query = "What are the capital of Brazil?"
         answer = assistant.ask(query)
         
         print(f"\n Assistant: {answer}")
