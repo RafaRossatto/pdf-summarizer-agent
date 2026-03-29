@@ -15,9 +15,6 @@ if not URL:
     print("❌ Erro: BASE_URL não encontrada no arquivo .env")
     exit(1)
 
-print(f"🔗 Conectando à URL: {URL}")
-print(f"🔑 Usando chave: {MY_KEY[:10]}...")  # Mostra apenas início da chave
-
 try:
     client = OpenAI(api_key=MY_KEY, base_url=URL)
     print("✅ Cliente OpenAI inicializado com sucesso!")
