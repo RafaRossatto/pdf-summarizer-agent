@@ -12,24 +12,22 @@ def main():
     # Pegar o texto limpo como string
     clean_text = pdf.get_cleaned_text()
 
-    # print(f"Tamanho do texto: {len(clean_text)} caracteres")
-    # print(f"Primeiras 200 caracteres: {clean_text[:200]}")
-    # input()
-
     try:
     #     # Create an instance of the assistant
         assistant = StepFunAssistant()
-        
-    #     # Make a request
-    #     # query = "What are the capital of Brazil?"
-    #     query = clean_text
-    #     answer = assistant.ask(query)
-        
-    #     print(f"\n Assistant: {answer}")
-    # except Exception as e:
-    #     print(f"System Error: {e}")
+        result = assistant.ask_json(clean_text, save_to_json=True)
 
-        result = assistant.ask_json(clean_text)
+        # # Método 1: Salva JSON automaticamente com nome baseado no título
+        # result = assistant.ask_json(paper_text, save_to_json=True)
+
+        # # Método 2: Com nome personalizado
+        # result = assistant.ask_json(paper_text, save_to_json=True, custom_filename="meu_artigo_2024.json")
+
+        # # Método 3: Sem salvar (apenas retorna)
+        # result = assistant.ask_json(paper_text, save_to_json=False)
+
+        # # Método 4: Com retry e salvamento automático
+        # result = assistant.ask_json_with_retry(paper_text, max_retries=3, save_to_json=True)
 
         # Acessa os campos
         print(f"Title: {result['title']}")
