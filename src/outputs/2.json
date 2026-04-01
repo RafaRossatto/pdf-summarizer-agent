@@ -1,0 +1,22 @@
+{
+  "title": "Confinement-controlled chase-escape dynamics",
+  "doi": "10.1016/j.physa.2026.131524",
+  "summary": {
+    "objective": "To investigate how geometric disorder from randomly distributed static obstacles on a 2D square lattice controls collective chase-escape dynamics, linking spatial connectivity to pursuit efficiency.",
+    "methods": "Used a combination of geometric Breadth-First Search analysis, dynamical observables (trapping time and capture cost), survival statistics via Weibull distribution fitting, and transport characterization through mean-squared displacement exponent on an agent-based lattice model with short-range sensing rules.",
+    "results": "Observed non-monotonic dependence of trapping time and cost on obstacle density, with a maximum near percolation due to path elongation versus fragmentation; survival decay followed Weibull statistics, showing crossovers from compressed to stretched exponential regimes; transport became subdiffusive and converged near percolation, all indicating lattice connectivity as a key control parameter.",
+    "conclusion": "Chase-escape dynamics in disordered environments are governed by a geometry-driven crossover, where percolation and connectivity unify the spatial, temporal, and collective behavior, highlighting the role of geometric constraints in active matter systems."
+  },
+  "_metadata": {
+    "model": "stepfun/step-3.5-flash:free",
+    "temperature": 0.7,
+    "max_tokens": 5000,
+    "timestamp": "2026-04-01T19:26:19.906056",
+    "text_length": 50280,
+    "source_file": {
+      "path": "/home/rafarossatto/Desktop/quali/2.pdf",
+      "name": "2.pdf",
+      "directory": "/home/rafarossatto/Desktop/quali"
+    }
+  }
+}

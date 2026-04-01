@@ -4,7 +4,8 @@ from features.pdf import PDF
 def main():
     
     # load file
-    pdf = PDF("/home/rafarossatto/Desktop/quali/2.pdf")
+    path = "/home/rafarossatto/Desktop/quali/2.pdf"
+    pdf = PDF(path)
     pdf.load_pdf()
     
         # Apply cleaning
@@ -15,8 +16,13 @@ def main():
     try:
     #     # Create an instance of the assistant
         assistant = StepFunAssistant()
-        result = assistant.ask_json(clean_text, save_to_json=True)
-
+        #result = assistant.ask_json(clean_text, save_to_json=True)
+        # Processar com informações do arquivo original
+        result = assistant.ask_json(
+            paper_text=clean_text,
+            save_to_json=True,
+            original_file_path=path  # Passa o caminho do arquivo original
+)
         # # Método 1: Salva JSON automaticamente com nome baseado no título
         # result = assistant.ask_json(paper_text, save_to_json=True)
 

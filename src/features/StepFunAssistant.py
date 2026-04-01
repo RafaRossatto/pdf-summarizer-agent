@@ -80,12 +80,10 @@ class StepFunAssistant:
                     safe_name = "".join(c for c in paper_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
                     safe_name = safe_name.replace(' ', '_')[:50]  # Limit length
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    #filename = f"{safe_name}_{timestamp}.json"
                     filename = f"{safe_name}.json"
                     
                 else:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    #filename = f"paper_analysis_{timestamp}.json"
                     filename = f"paper_analysis_{timestamp}.json"
             
             # Ensure .json extension
@@ -106,8 +104,17 @@ class StepFunAssistant:
             print(f"❌ Error saving JSON: {e}")
             return None
 
-    def ask_json(self, paper_text, temperature=0.7, max_tokens=5000, save_to_json=True, custom_filename=None):
-        """Sends the paper text and returns structured JSON response."""
+    def ask_json(self, paper_text, temperature=0.7, max_tokens=5000, save_to_json=True, custom_filename=None, original_file_path=None):
+        """Sends the paper text and returns structured JSON response.
+        
+        Args:
+            paper_text (str): The extracted text from the PDF
+            temperature (float): Temperature for model response
+            max_tokens (int): Maximum tokens in response
+            save_to_json (bool): Whether to save result to JSON file
+            custom_filename (str, optional): Custom filename for JSON output
+            original_file_path (str, optional): Original PDF file path
+        """
         try:
             messages = self.create_paper_analysis_messages(paper_text)
             
@@ -132,40 +139,87 @@ class StepFunAssistant:
                 else:
                     result = json.loads(response_content)
                 
-                # # Add metadata to the result
-                # result["_metadata"] = {
-                #     "model": self.model,
-                #     "temperature": temperature,
-                #     "max_tokens": max_tokens,
-                #     "timestamp": datetime.now().isoformat(),
-                #     "text_length": len(paper_text)
-                # }
+                # Extract file information
+                file_name = None
+                file_directory = None
+                if original_file_path:
+                    file_name = os.path.basename(original_file_path)
+                    file_directory = os.path.dirname(original_file_path)
+                
+                # Add metadata to the result
+                result["_metadata"] = {
+                    "model": self.model,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "timestamp": datetime.now().isoformat(),
+                    "text_length": len(paper_text),
+                    "source_file": {
+                        "path": original_file_path,
+                        "name": file_name,
+                        "directory": file_directory
+                    } if original_file_path else None
+                }
                 
                 # Save to JSON file if requested
                 if save_to_json:
                     paper_title = result.get("title", None)
-                    self._save_to_json(result, custom_filename, paper_title)
+                    # Use custom filename or generate from original file name
+                    if custom_filename:
+                        json_filename = custom_filename
+                    elif original_file_path:
+                        # Generate filename from original PDF name
+                        base_name = os.path.splitext(file_name)[0]
+                        json_filename = f"{base_name}.json"
+                    else:
+                        json_filename = None
+                    
+                    self._save_to_json(result, json_filename, paper_title)
                 
                 return result
                 
             except json.JSONDecodeError:
                 # If JSON parsing fails, return the raw response
+                file_name = None
+                file_directory = None
+                if original_file_path:
+                    file_name = os.path.basename(original_file_path)
+                    file_directory = os.path.dirname(original_file_path)
+                
                 error_result = {
                     "error": "Failed to parse JSON response",
                     "raw_response": response_content,
                     "_metadata": {
                         "model": self.model,
                         "timestamp": datetime.now().isoformat(),
-                        "text_length": len(paper_text)
+                        "text_length": len(paper_text),
+                        "source_file": {
+                            "path": original_file_path,
+                            "name": file_name,
+                            "directory": file_directory
+                        } if original_file_path else None
                     }
                 }
                 
                 if save_to_json:
-                    self._save_to_json(error_result, custom_filename, "error_response")
+                    if custom_filename:
+                        json_filename = custom_filename
+                    elif original_file_path:
+                        base_name = os.path.splitext(file_name)[0]
+                        json_filename = f"{base_name}_error.json"
+                    else:
+                        json_filename = None
+                        
+                    self._save_to_json(error_result, json_filename, "error_response")
                 
                 return error_result
                 
         except Exception as e:
+            file_name = None
+            file_directory = None
+            if original_file_path:
+                file_name = os.path.basename(original_file_path)
+                file_directory = os.path.dirname(original_file_path)
+            
             error_result = {
                 "error": f"API Error: {e}",
                 "title": None,
@@ -174,14 +228,127 @@ class StepFunAssistant:
                 "_metadata": {
                     "model": self.model,
                     "timestamp": datetime.now().isoformat(),
-                    "text_length": len(paper_text)
+                    "text_length": len(paper_text),
+                    "source_file": {
+                        "path": original_file_path,
+                        "name": file_name,
+                        "directory": file_directory
+                    } if original_file_path else None
                 }
             }
             
             if save_to_json:
-                self._save_to_json(error_result, custom_filename, "error_response")
+                if custom_filename:
+                    json_filename = custom_filename
+                elif original_file_path:
+                    base_name = os.path.splitext(file_name)[0]
+                    json_filename = f"{base_name}_error.json"
+                else:
+                    json_filename = None
+                    
+                self._save_to_json(error_result, json_filename, "error_response")
             
             return error_result
+
+    def ask_json_with_retry(self, paper_text, temperature=0.7, max_tokens=5000, max_retries=3, save_to_json=True, original_file_path=None):
+        """Sends prompt with automatic retry on rate limits and returns JSON.
+        
+        Args:
+            paper_text (str): The extracted text from the PDF
+            temperature (float): Temperature for model response
+            max_tokens (int): Maximum tokens in response
+            max_retries (int): Number of retry attempts
+            save_to_json (bool): Whether to save result to JSON file
+            original_file_path (str, optional): Original PDF file path
+        """
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                result = self.ask_json(paper_text, temperature, max_tokens, save_to_json, 
+                                    custom_filename=None, original_file_path=original_file_path)
+                
+                # Check if result contains an error
+                if "error" in result and "429" in str(result.get("error", "")):
+                    wait_time = (2 ** attempt) * 3
+                    print(f"Rate limit detected. Waiting {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                elif "error" in result and attempt < max_retries - 1:
+                    # Other errors, maybe retry
+                    wait_time = (2 ** attempt) * 2
+                    print(f"Error detected: {result['error']}. Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    return result
+                    
+            except Exception as e:
+                last_error = str(e)
+                if "429" in str(e) and attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) * 3
+                    print(f"Rate limit detected. Waiting {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                else:
+                    file_name = None
+                    if original_file_path:
+                        file_name = os.path.basename(original_file_path)
+                    
+                    error_result = {
+                        "error": f"API Error: {e}",
+                        "title": None,
+                        "doi": None,
+                        "summary": None,
+                        "_metadata": {
+                            "model": self.model,
+                            "timestamp": datetime.now().isoformat(),
+                            "source_file": {
+                                "path": original_file_path,
+                                "name": file_name
+                            } if original_file_path else None
+                        }
+                    }
+                    
+                    if save_to_json:
+                        if original_file_path:
+                            base_name = os.path.splitext(file_name)[0]
+                            json_filename = f"{base_name}_error.json"
+                        else:
+                            json_filename = None
+                            
+                        self._save_to_json(error_result, json_filename, "error_response")
+                    
+                    return error_result
+        
+        file_name = None
+        if original_file_path:
+            file_name = os.path.basename(original_file_path)
+        
+        error_result = {
+            "error": f"Failed after {max_retries} retries. Last error: {last_error}",
+            "title": None,
+            "doi": None,
+            "summary": None,
+            "_metadata": {
+                "model": self.model,
+                "timestamp": datetime.now().isoformat(),
+                "source_file": {
+                    "path": original_file_path,
+                    "name": file_name
+                } if original_file_path else None
+            }
+        }
+        
+        if save_to_json:
+            if original_file_path:
+                base_name = os.path.splitext(file_name)[0]
+                json_filename = f"{base_name}_error.json"
+            else:
+                json_filename = None
+                
+            self._save_to_json(error_result, json_filename, "error_response")
+        
+        return error_result
 
     # def ask_json_with_retry(self, paper_text, temperature=0.7, max_tokens=5000, max_retries=3, save_to_json=True):
     #     """Sends prompt with automatic retry on rate limits and returns JSON."""
