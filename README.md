@@ -13,7 +13,24 @@ A powerful Python tool for extracting and analyzing scientific paper content usi
 
 ## Workflow
 
-See the Step1.pdf file.
+1. **Get PDF** 
+   - Load the PDF file from the provided path
+   - Extract raw text content
+
+2. **Clean Text**
+   - Remove unwanted characters and formatting
+   - Normalize whitespace and line breaks
+   - Prepare clean text for LLM processing
+
+3. **LLM Analysis**
+   - Send cleaned text to OpenRouter API
+   - LLM extracts: Title, DOI, Objective, Methods, Results, Conclusion
+   - Returns structured JSON response
+
+4. **Export JSON**
+   - Save extracted information as JSON file
+   - Add metadata (timestamp, model used, text length)
+   - Display results in terminal
 
 ## Project Structure
 
