@@ -49,6 +49,10 @@ htmlcov/
 env/
 venv/
 
+# Output directory
+
+outputs/
+
 # Arquivos de sistema
 .DS_Store
 Thumbs.db
