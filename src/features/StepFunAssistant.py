@@ -457,7 +457,6 @@ class StepFunAssistant:
         except Exception as e:
             return self._create_error_response(e, paper_text, output_file_path, custom_filename, save_to_json)
 
-
     def _parse_json_response(self, response_content):
         """
         Extracts and parses JSON from the AI model's response content.
