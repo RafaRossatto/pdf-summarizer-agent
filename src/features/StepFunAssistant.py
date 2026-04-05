@@ -377,59 +377,7 @@ class StepFunAssistant:
             3. Extract the substring between these positions (inclusive)
             4. If no braces are found, attempt to parse the entire response as JSON
             5. Parse the extracted string using json.loads()
-        
-        Examples:
-            >>> assistant = StepFunAssistant()
-            
-            >>> # Example 1: Clean JSON response
-            >>> response = '{"title": "Deep Learning", "doi": "10.1016/j.dl.2024.01.001"}'
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['title'])
-            'Deep Learning'
-            
-            >>> # Example 2: JSON with prefix text
-            >>> response = 'Here is the analysis: {"title": "AI in Medicine", "summary": {...}}'
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['title'])
-            'AI in Medicine'
-            
-            >>> # Example 3: JSON with suffix text
-            >>> response = '{"title": "Cancer Detection"} I hope this helps!'
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['title'])
-            'Cancer Detection'
-            
-            >>> # Example 4: JSON with both prefix and suffix
-            >>> response = 'Analysis result: {"title": "Neural Networks"} End of analysis'
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['title'])
-            'Neural Networks'
-            
-            >>> # Example 5: Multi-line JSON response
-            >>> response = '''
-            ... Here is the paper analysis:
-            ... {
-            ...     "title": "Machine Learning Review",
-            ...     "doi": "10.1038/s41586-023-00001-0",
-            ...     "summary": {
-            ...         "objective": "Review ML applications",
-            ...         "methods": "Systematic literature review",
-            ...         "results": "ML shows promise in healthcare",
-            ...         "conclusion": "More research needed"
-            ...     }
-            ... }
-            ... Thank you for using our service!
-            ... '''
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['summary']['objective'])
-            'Review ML applications'
-            
-            >>> # Example 6: Nested JSON structures
-            >>> response = '{"metadata": {"version": "1.0"}, "data": {"title": "Paper"}}'
-            >>> result = assistant._parse_json_response(response)
-            >>> print(result['metadata']['version'])
-            '1.0'
-        
+               
         Common AI Response Patterns Handled:
             - "Here is the JSON: {...}"
             - "The analysis result is {...}"
@@ -467,11 +415,6 @@ class StepFunAssistant:
             (ask_json) is responsible for catching and handling parsing errors
             appropriately, typically by returning an error response structure.
         
-        Why This Approach?
-            Many AI models, including StepFun, sometimes add conversational text
-            around the JSON response to make it more human-readable. This method
-            robustly handles that behavior without requiring changes to the AI
-            prompt or post-processing the response in complex ways.
         """
         # Find JSON in response (handles extra text before/after)
         json_start = response_content.find('{')
@@ -483,7 +426,6 @@ class StepFunAssistant:
             json_str = response_content
         
         return json.loads(json_str)
-
 
     def _create_metadata(self, paper_text, temperature, max_tokens, output_file_path):
         """
