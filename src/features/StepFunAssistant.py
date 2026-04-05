@@ -283,40 +283,7 @@ class StepFunAssistant:
         
         Returns:
             dict: A structured dictionary containing the analysis results with the following schema:
-            
-            **Success Response Structure:**
-            {
-                "title": str,                    # Paper title extracted from the text
-                "doi": str or None,              # DOI identifier (null if not found)
-                "summary": {
-                    "objective": str,            # Research objectives (1-2 sentences)
-                    "methods": str,              # Methodology description (1-2 sentences)
-                    "results": str,              # Key findings (1-2 sentences)
-                    "conclusion": str            # Main conclusions (1-2 sentences)
-                },
-                "_metadata": {
-                    "model": str,                # AI model identifier used
-                    "temperature": float,        # Temperature setting used
-                    "max_tokens": int,           # Max tokens setting used
-                    "timestamp": str,            # ISO 8601 format timestamp
-                    "text_length": int,          # Length of input text in characters
-                    "source_file": {             # Present only if output_file_path provided
-                        "path": str,             # Absolute path to original PDF
-                        "name": str,             # PDF filename with extension
-                        "directory": str         # Parent directory path
-                    } or None
-                }
-            }
-            
-            **Error Response Structure:**
-            {
-                "error": str,                    # Error description ("API Error: {details}")
-                "title": None,
-                "doi": None,
-                "summary": None,
-                "_metadata": {...}               # Same metadata structure as above
-            }
-        
+                   
         Raises:
             No exceptions are propagated. All exceptions are caught and returned as
             error dictionaries. This ensures the method always returns a dictionary
@@ -329,36 +296,7 @@ class StepFunAssistant:
             4. **Metadata Enrichment**: Adds metadata via _create_metadata()
             5. **File Persistence**: Optionally saves via _save_analysis_result()
             6. **Response Return**: Returns the enriched result dictionary
-        
-        Example Usage:
-            >>> # Basic usage
-            >>> assistant = StepFunAssistant()
-            >>> result = assistant.ask_json(paper_text=cleaned_text)
-            >>> print(result['title'])
-            "Deep Learning in Healthcare"
-            
-            >>> # With custom temperature and saving options
-            >>> result = assistant.ask_json(
-            ...     paper_text=cleaned_text,
-            ...     temperature=0.3,  # More precise responses
-            ...     save_to_json=True,
-            ...     output_file_path="/path/to/paper.pdf"
-            ... )
-            
-            >>> # Custom JSON output location
-            >>> result = assistant.ask_json(
-            ...     paper_text=cleaned_text,
-            ...     custom_filename="/custom/path/analysis.json",
-            ...     output_file_path="/path/to/paper.pdf"
-            ... )
-            
-            >>> # Error handling example
-            >>> result = assistant.ask_json(paper_text=cleaned_text)
-            >>> if 'error' in result:
-            ...     print(f"Analysis failed: {result['error']}")
-            ... else:
-            ...     print(f"Success: {result['title']}")
-        
+
         Notes:
             - The method is designed to be robust and never throw exceptions
             - Metadata is always included in the response, even for errors
@@ -373,12 +311,6 @@ class StepFunAssistant:
             - _save_analysis_result(): Handles file persistence logic
             - _create_error_response(): Constructs error responses
             - create_paper_analysis_messages(): Builds the AI prompt structure
-        
-        Performance Considerations:
-            - Input text length affects API response time and token usage
-            - Higher max_tokens values may increase response time
-            - Temperature has minimal impact on performance but affects output quality
-            - File I/O occurs only when save_to_json=True
         
         Error Scenarios Handled:
             - Network failures during API request
