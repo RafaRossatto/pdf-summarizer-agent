@@ -86,7 +86,7 @@ After setting up your `.env` file, run the script from the terminal:
 python src/main.py /path/to/your/paper.pdf
 
 # Specify custom output location for the JSON file
-python src/main.py /path/to/paper.pdf --output /path/to/result.jsona
+python src/main.py /path/to/paper.pdf --output /path/to/result.json
 
 # Short form using -o (saves to current directory)
 python src/main.py /path/to/paper.pdf -o result.json
