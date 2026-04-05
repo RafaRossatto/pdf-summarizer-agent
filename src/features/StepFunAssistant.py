@@ -665,72 +665,7 @@ class StepFunAssistant:
                             "source_file": dict or None
                         }
                     }
-            
-            Examples:
-                >>> assistant = StepFunAssistant()
-                
-                >>> # Example 1: Network error with file saving
-                >>> try:
-                ...     raise ConnectionError("Failed to connect to API")
-                ... except Exception as e:
-                ...     error_response = assistant._create_error_response(
-                ...         error=e,
-                ...         paper_text="Sample paper text",
-                ...         output_file_path="/path/paper.pdf",
-                ...         custom_filename=None,
-                ...         save_to_json=True
-                ...     )
-                >>> print(error_response['error'])
-                'API Error: Failed to connect to API'
-                >>> print(error_response['title'])
-                None
-                
-                >>> # Example 2: JSON parsing error with custom filename
-                >>> try:
-                ...     raise json.JSONDecodeError("Invalid JSON", "...", 0)
-                ... except json.JSONDecodeError as e:
-                ...     error_response = assistant._create_error_response(
-                ...         error=e,
-                ...         paper_text="Paper content",
-                ...         output_file_path="/data/paper.pdf",
-                ...         custom_filename="results/output.json",
-                ...         save_to_json=True
-                ...     )
-                # Saves to: results/output.json (custom filename takes priority)
-                
-                >>> # Example 3: Error without saving to file
-                >>> error_response = assistant._create_error_response(
-                ...     error=ValueError("Invalid parameter"),
-                ...     paper_text="Content",
-                ...     output_file_path=None,
-                ...     custom_filename=None,
-                ...     save_to_json=False
-                ... )
-                >>> print(error_response['_metadata']['text_length'])
-                7
-                # No file is created on disk
-                
-                >>> # Example 4: Timeout error with automatic naming
-                >>> error_response = assistant._create_error_response(
-                ...     error=TimeoutError("Request timed out"),
-                ...     paper_text="Long paper..." * 1000,
-                ...     output_file_path="/home/user/thesis.pdf",
-                ...     custom_filename=None,
-                ...     save_to_json=True
-                ... )
-                # Saves to: /home/user/thesis_error.json
-                >>> print(error_response['_metadata']['source_file']['name'])
-                'thesis.pdf'
-                
-                >>> # Example 5: Client-side error handling pattern
-                >>> result = assistant.ask_json(paper_text=text)
-                >>> if 'error' in result:
-                ...     print(f"Analysis failed: {result['error']}")
-                ...     print(f"At: {result['_metadata']['timestamp']}")
-                ...     print(f"Text length: {result['_metadata']['text_length']}")
-                ... else:
-                ...     print(f"Success: {result['title']}")
-            
+                       
             Filename Generation Rules:
                 - If custom_filename is provided: Use it as-is (no modification)
                 - Else if output_file_path is provided: Add "_error" suffix (paper.pdf -> paper_error.json)
@@ -758,14 +693,7 @@ class StepFunAssistant:
                 - The paper_title passed to _save_to_json is "error_response"
                 - This method does NOT catch exceptions - called from within except block
                 - The method always returns a dictionary, never raises exceptions
-            
-            Advantages of This Approach:
-                1. Consistent API: Success and error responses have similar structure
-                2. Graceful Degradation: System never crashes from API errors
-                3. Debugging Support: Rich metadata included with every error
-                4. Flexible Persistence: Option to save or not save errors to disk
-                5. User Control: Custom filenames respected even for errors
-            
+                       
             Common Use Cases:
                 Production Monitoring:
                     result = assistant.ask_json(paper_text)
@@ -774,17 +702,6 @@ class StepFunAssistant:
                             f"Analysis failed: {result['error']}",
                             extra=result['_metadata']
                         )
-                
-                Batch Processing:
-                    failed_files = []
-                    for pdf_path in pdf_list:
-                        result = assistant.ask_json(paper_text, output_file_path=pdf_path)
-                        if 'error' in result:
-                            failed_files.append({
-                                'file': pdf_path,
-                                'error': result['error'],
-                                'timestamp': result['_metadata']['timestamp']
-                            })
                 
                 User Feedback:
                     result = assistant.ask_json(paper_text)
@@ -796,23 +713,10 @@ class StepFunAssistant:
                         else:
                             show_message("Analysis failed, please try again")
             
-            Performance:
-                - Time complexity: O(1) - constant time operations
-                - Memory: Creates small dictionary (typically < 1KB)
-                - File I/O: Only occurs if save_to_json=True
-                - String conversion: Fast even for large exception objects
-            
             See Also:
                 - _create_metadata(): Called to generate error metadata with safe defaults
                 - _save_to_json(): Handles error persistence to disk
                 - ask_json(): The public method that calls this on exceptions
-            
-            Best Practices:
-                1. Always set save_to_json=True in production to maintain error logs
-                2. Check for 'error' key before accessing other fields in result
-                3. Use metadata timestamp for error tracking and trend analysis
-                4. Log the complete error response for production debugging
-                5. Monitor error patterns by analyzing saved error JSON files
             """
         error_result = {
             "error": f"API Error: {error}",
