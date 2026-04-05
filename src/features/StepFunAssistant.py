@@ -11,24 +11,7 @@ class StepFunAssistant:
     This class provides functionality to send scientific paper text to an AI model
     and receive structured JSON responses containing key information such as title,
     DOI, and summary sections (objective, methods, results, conclusion).
-    
-    Attributes:
-        api_key (str): API key for authentication, loaded from environment variables
-        base_url (str): Base URL for the API endpoint, loaded from environment variables
-        model (str): The AI model identifier to use for analysis
-        output_dir (str): Directory path where JSON outputs will be saved
-        client (OpenAI): The OpenAI-compatible client instance for API communication
-    
-    Environment Variables Required:
-        MY_KEY (str): API key for authentication
-        BASE_URL (str): Base URL for the API endpoint
-    
-    Example:
-        >>> assistant = StepFunAssistant()
-        >>> result = assistant.ask_json(paper_text="...", save_to_json=True)
-        >>> print(result['title'])
-        >>> print(result['summary']['objective'])
-    """
+        """
     def __init__(self, model="stepfun/step-3.5-flash:free", output_dir="outputs"):
         """
         Initializes the StepFunAssistant with configuration and creates the API client.
@@ -49,21 +32,6 @@ class StepFunAssistant:
         Raises:
             ValueError: If required environment variables (MY_KEY or BASE_URL) are missing
             RuntimeError: If the client initialization fails
-        
-        Example:
-            >>> # Use default settings
-            >>> assistant = StepFunAssistant()
-            
-            >>> # Use custom model and output directory
-            >>> assistant = StepFunAssistant(
-            ...     model="stepfun/step-4.0",
-            ...     output_dir="custom_outputs"
-            ... )
-        
-        Notes:
-            - Environment variables must be set in a .env file in the project root
-            - The output directory is created automatically if it doesn't exist
-            - The client initialization is validated before creating the instance
         """
         load_dotenv()
         
@@ -220,19 +188,6 @@ class StepFunAssistant:
         File Location:
             All JSON files are saved to the instance's `output_dir` directory, which
             is set during class initialization (defaults to "outputs/").
-        
-        Example:
-            >>> # Save with auto-generated name from paper title
-            >>> assistant._save_to_json(data, paper_name="Machine Learning Review")
-            # Saves to: outputs/Machine_Learning_Review_20231215_143022.json
-            
-            >>> # Save with custom filename
-            >>> assistant._save_to_json(data, filename="custom_result.json")
-            # Saves to: outputs/custom_result.json
-            
-            >>> # Save with timestamp-based filename
-            >>> assistant._save_to_json(data)
-            # Saves to: outputs/paper_analysis_20231215_143022.json
         
         Notes:
             - The method automatically creates the output directory if it doesn't exist
