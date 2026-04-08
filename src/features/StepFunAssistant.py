@@ -331,14 +331,6 @@ class StepFunAssistant:
             result = self._parse_json_response(response.choices[0].message.content)
 
 
-            # if doi:
-            #     result["doi"] = doi  # Adiciona o campo DOI
-            # else:
-            #     result["doi"] = None  # Ou deixa vazio se não encontrou
-
-
-
-                    # 🔥 REORGANIZA O DICIONÁRIO para colocar DOI após o título
             if doi:
                 # Cria um novo dicionário na ordem desejada
                 organized_result = {
