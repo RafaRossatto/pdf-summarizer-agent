@@ -330,7 +330,6 @@ class StepFunAssistant:
             # Parse JSON from response
             result = self._parse_json_response(response.choices[0].message.content)
 
-
             if doi:
                 # Cria um novo dicionário na ordem desejada
                 organized_result = {
