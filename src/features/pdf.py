@@ -1579,3 +1579,101 @@ class PDF:
         
         print(f" Valid text {context}: {len(text_stripped)} chars, {word_count} words")
         return True
+
+    # def get_doi(self) -> str:
+    #     """
+    #     Extract and return the DOI from the cleaned text.
+        
+    #     This method searches for DOI patterns in the text and returns the first
+    #     valid DOI found. Returns empty string if no DOI is found.
+        
+    #     Returns:
+    #         str: The DOI string if found, otherwise an empty string
+        
+    #     Examples:
+    #         >>> pdf = PDF("article.pdf")
+    #         >>> pdf.load_pdf()
+    #         >>> doi = pdf.get_doi()
+    #         >>> print(doi)
+    #         '10.1038/s41586-020-1234-5'
+            
+    #         >>> if doi:
+    #         ...     print(f"DOI found: {doi}")
+    #         ... else:
+    #         ...     print("No DOI found")
+    #     """
+    # #import re
+    
+    #     # Get cleaned text
+    #     text = self.get_cleaned_text()
+        
+    #     if not text:
+    #         return ""
+        
+    #     # Pattern for DOI (without prefix)
+    #     doi_pattern = r'\b10\.\d{4,9}/[-._;()/:A-Z0-9a-z]+'
+        
+    #     # Pattern for DOI with "DOI:" prefix
+    #     doi_with_prefix = r'DOI:\s*(10\.\d{4,9}/[-._;()/:A-Z0-9a-z]+)'
+        
+    #     # First try to find DOI with prefix (more specific)
+    #     match = re.search(doi_with_prefix, text, re.IGNORECASE)
+    #     if match:
+    #         return match.group(1)
+        
+    #     # If not found, try without prefix
+    #     match = re.search(doi_pattern, text)
+    #     if match:
+    #         return match.group(0)
+        
+    #     # No DOI found
+    #     return ""
+
+    # def get_doi(self) -> str:
+    #     """
+    #     Extract and return the DOI from the cleaned text.
+    #     """
+    #     import re
+        
+    #     if not self.cleaned_text:
+    #         print("DEBUG: cleaned_text está vazio")
+    #         return ""
+        
+    #     # DEBUG: Mostra o texto antes do regex
+    #     print("DEBUG: Texto completo:")
+    #     print(repr(self.cleaned_text))  # Mostra caracteres especiais
+    #     print("\nDEBUG: Primeiros 500 caracteres:")
+    #     print(self.cleaned_text[:500])
+    #     print("\n" + "="*50)
+    #     input()
+
+    #     # Procura o DOI
+    #     doi_pattern = r'10\.\d{4,9}/[^\s]+'
+    #     match = re.search(doi_pattern, self.cleaned_text)
+        
+    #     if match:
+    #         print(f"DEBUG: Regex encontrou: '{match.group(0)}'")
+    #         return match.group(0)
+    #     else:
+    #         print("DEBUG: Regex NÃO encontrou nenhum DOI")
+    #         return ""
+
+    def get_doi(self) -> str:
+        
+        if not self.cleaned_text:
+            return ""
+        
+        # Remove espaços dentro de padrões de DOI
+        # Substitui "doi. org" por "doi.org"
+        texto_limpo = re.sub(r'doi\.\s+org', 'doi.org', self.cleaned_text)
+        # Substitui "j. physa" por "j.physa" (remove espaço entre palavras)
+        texto_limpo = re.sub(r'(\w)\.\s+(\w)', r'\1.\2', texto_limpo)
+        
+        # Agora busca o DOI
+        doi_pattern = r'10\.\d{4,9}/[^\s]+'
+        match = re.search(doi_pattern, texto_limpo)
+        
+        if match:
+            return match.group(0)
+        
+        return ""
