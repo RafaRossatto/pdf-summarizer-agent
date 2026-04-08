@@ -95,7 +95,7 @@ def main():
         
         # Send the cleaned text to the AI and get structured JSON response
         result = assistant.ask_json(
-            paper_text=clean_text,
+            paper_text=clean_text,doi = doi,
             save_to_json=True,
             output_file_path=args.file_path,
             custom_filename=args.output  # Uses the --output path for JSON export

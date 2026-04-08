@@ -1659,7 +1659,7 @@ class PDF:
     #         return ""
 
     def get_doi(self) -> str:
-        
+
         if not self.cleaned_text:
             return ""
         

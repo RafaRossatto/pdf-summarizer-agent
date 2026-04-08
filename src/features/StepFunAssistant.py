@@ -125,12 +125,11 @@ class StepFunAssistant:
 
                     Your task is to analyze the provided paper text and extract:
                     1. The exact title
-                    2. The DOI (Digital Object Identifier) if present
-                    3. A comprehensive summary
+                    2. A comprehensive summary
 
                     Return your response in JSON format as shown below. Do not add any text outside the JSON structure."""},
                                 
-                                {"role": "user", "content": f"""
+                    {"role": "user", "content": f"""
                     Extract from this paper:
 
                     {paper_text}
@@ -138,7 +137,6 @@ class StepFunAssistant:
                     Return in this exact JSON format:
                     {{
                         "title": "",
-                        "doi": "",
                         "summary": {{
                             "objective": "",
                             "methods": "",
@@ -238,7 +236,7 @@ class StepFunAssistant:
             print(f"Error saving JSON: {e}")
             return None
 
-    def ask_json(self, paper_text, temperature=0.7, max_tokens=5000, save_to_json=True, custom_filename=None, output_file_path=None):
+    def ask_json(self, paper_text,doi=None, temperature=0.7, max_tokens=5000, save_to_json=True, custom_filename=None, output_file_path=None):
         """
         Sends scientific paper text to the AI model and returns a structured JSON response.
         
@@ -331,15 +329,47 @@ class StepFunAssistant:
             
             # Parse JSON from response
             result = self._parse_json_response(response.choices[0].message.content)
+
+
+            # if doi:
+            #     result["doi"] = doi  # Adiciona o campo DOI
+            # else:
+            #     result["doi"] = None  # Ou deixa vazio se não encontrou
+
+
+
+                    # 🔥 REORGANIZA O DICIONÁRIO para colocar DOI após o título
+            if doi:
+                # Cria um novo dicionário na ordem desejada
+                organized_result = {
+                    "title": result.get("title"),
+                    "doi": doi,  # DOI logo após o título
+                    "summary": result.get("summary")
+                }
+            else:
+                organized_result = {
+                    "title": result.get("title"),
+                    "doi": None,
+                    "summary": result.get("summary")
+                }
             
-            # Add metadata
-            result["_metadata"] = self._create_metadata(paper_text, temperature, max_tokens, output_file_path)
+            # Adiciona metadata (opcional - pode ficar no final)
+            organized_result["_metadata"] = self._create_metadata(paper_text, temperature, max_tokens, output_file_path)
             
             # Save to file if requested
             if save_to_json:
-                self._save_analysis_result(result, custom_filename, output_file_path)
+                self._save_analysis_result(organized_result, custom_filename, output_file_path)
             
-            return result
+            return organized_result
+
+            # # Add metadata
+            # result["_metadata"] = self._create_metadata(paper_text, temperature, max_tokens, output_file_path)
+            
+            # # Save to file if requested
+            # if save_to_json:
+            #     self._save_analysis_result(result, custom_filename, output_file_path)
+            
+            # return result
             
         except Exception as e:
             return self._create_error_response(e, paper_text, output_file_path, custom_filename, save_to_json)
@@ -721,7 +751,6 @@ class StepFunAssistant:
         error_result = {
             "error": f"API Error: {error}",
             "title": None,
-            "doi": None,
             "summary": None,
             "_metadata": self._create_metadata(paper_text, 0, 0, output_file_path)
         }
