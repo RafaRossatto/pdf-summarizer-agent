@@ -1,16 +1,15 @@
-import os
-import json
-import re
+
 from datetime import datetime
 from typing import List, Optional
 from dotenv import load_dotenv
 from openai import OpenAI
-
-# Imports LangChain 1.x
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
+import os
+import json
+import re
 
 # ============================================
 # DEFINIÇÃO DOS SCHEMAS (Pydantic)
