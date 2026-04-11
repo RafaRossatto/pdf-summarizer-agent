@@ -12,7 +12,7 @@ class StepFunAssistant:
     and receive structured JSON responses containing key information such as title,
     DOI, and summary sections (objective, methods, results, conclusion).
         """
-    def __init__(self, model="stepfun/step-3.5-flash:free", output_dir="outputs"):
+    def __init__(self, model="stepfun/step-3.5-flash", output_dir="outputs"):
         """
         Initializes the StepFunAssistant with configuration and creates the API client.
         
