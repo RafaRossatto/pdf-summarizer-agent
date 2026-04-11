@@ -101,15 +101,31 @@ def main():
             custom_filename=args.output  # Uses the --output path for JSON export
         )
 
-        # Display the extracted information to the user
+        # Display the extracted information
         print("\n=== Extracted Paper Information ===")
-        print(f"Title: {result['title']}")
-        print(f"DOI: {result['doi']}")
+        print(f"Title: {result.get('title')}")
+        print(f"Journal: {result.get('journal')}")
+        print(f"Publication Date: {result.get('publication_date')}")
+        print(f"DOI: {result.get('doi')}")
+
+        # Exibe os autores
+        authors = result.get('authors', [])
+        if authors:
+            print("\n--- Authors ---")
+            for author in authors:
+                print(f"  Name: {author.get('name')}")
+                if author.get('affiliation'):
+                    print(f"  Affiliation: {author.get('affiliation')}")
+                print()
+        else:
+            print("Authors: Not found")
+
         print("\n--- Summary ---")
-        print(f"Objective: {result['summary']['objective']}")
-        print(f"Methods: {result['summary']['methods']}")
-        print(f"Results: {result['summary']['results']}")
-        print(f"Conclusion: {result['summary']['conclusion']}")
+        summary = result.get('summary', {})
+        print(f"Objective: {summary.get('objective')}")
+        print(f"Methods: {summary.get('methods')}")
+        print(f"Results: {summary.get('results')}")
+        print(f"Conclusion: {summary.get('conclusion')}")
         print("===================================\n")
         
     except KeyError as e:

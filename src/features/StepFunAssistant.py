@@ -121,33 +121,49 @@ class StepFunAssistant:
             - DOI field returns null if not found in the paper
         """
         messages = [
-                    {"role": "system", "content": """You are a scientific article analysis assistant specialized in extracting key information from academic papers.
+                {"role": "system", "content": """You are a scientific article analysis assistant specialized in extracting key information from academic papers.
 
-                    Your task is to analyze the provided paper text and extract:
-                    1. The exact title
-                    2. A comprehensive summary
+        Your task is to analyze the provided paper text and extract:
+        1. The exact title
+        2. The journal name where it was published
+        3. The publication date (year, or full date if available)
+        4. All authors and their affiliations (if available)
+        5. A comprehensive summary
 
-                    Return your response in JSON format as shown below. Do not add any text outside the JSON structure."""},
-                                
-                    {"role": "user", "content": f"""
-                    Extract from this paper:
+        Return your response in JSON format as shown below. Do not add any text outside the JSON structure."""},
+                
+                {"role": "user", "content": f"""
+        Extract from this paper:
 
-                    {paper_text}
+        {paper_text}
 
-                    Return in this exact JSON format:
-                    {{
-                        "title": "",
-                        "summary": {{
-                            "objective": "",
-                            "methods": "",
-                            "results": "",
-                            "conclusion": ""
-                        }}
-                    }}
+        Return in this exact JSON format:
+        {{
+            "title": "",
+            "journal": "",
+            "publication_date": "",
+            "authors": [
+                {{
+                    "name": "",
+                    "affiliation": ""
+                }}
+            ],
+            "summary": {{
+                "objective": "",
+                "methods": "",
+                "results": "",
+                "conclusion": ""
+            }}
+        }}
 
-                    If DOI is not found, use null. Keep each summary field to 1-2 sentences."""}
-                ]
-        
+        Instructions:
+        - If journal is not found, use null
+        - If publication_date is not found, use null
+        - If author affiliation is not found, use null or empty string
+        - Each summary field should be 1-2 sentences
+        - Return ONLY the JSON, no text before or after
+        """}
+            ]
         return messages
 
     def _save_to_json(self, data, filename=None, paper_name=None):
@@ -330,16 +346,22 @@ class StepFunAssistant:
             # Parse JSON from response
             result = self._parse_json_response(response.choices[0].message.content)
 
+         # Organiza o resultado com os novos campos
             if doi:
-                # Cria um novo dicionário na ordem desejada
                 organized_result = {
                     "title": result.get("title"),
-                    "doi": doi,  # DOI logo após o título
+                    "journal": result.get("journal"),
+                    "publication_date": result.get("publication_date"),
+                    "authors": result.get("authors", []),
+                    "doi": doi,
                     "summary": result.get("summary")
                 }
             else:
                 organized_result = {
                     "title": result.get("title"),
+                    "journal": result.get("journal"),
+                    "publication_date": result.get("publication_date"),
+                    "authors": result.get("authors", []),
                     "doi": None,
                     "summary": result.get("summary")
                 }
