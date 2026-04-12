@@ -327,34 +327,3 @@ class StepFunAssistant:
         except Exception as e:
             print(f"❌ Error saving JSON: {e}")
             return None
-    
-    # # ============================================
-    # # MÉTODOS DE ERRO
-    # # ============================================
-    
-    # def _create_error_response(self, error, paper_text, doi, output_file_path, custom_filename, save_to_json):
-    #     """Creates a structured error response when analysis fails."""
-    #     error_result = {
-    #         "error": f"API Error: {error}",
-    #         "title": None,
-    #         "journal": None,
-    #         "publication_date": None,
-    #         "authors": [],
-    #         "doi": doi,
-    #         "summary": {},
-    #         "_metadata": self._create_metadata(paper_text, 0, 0, output_file_path)
-    #     }
-        
-    #     # Save error to file if requested
-    #     if save_to_json:
-    #         if custom_filename:
-    #             json_filename = custom_filename
-    #         elif output_file_path:
-    #             base_name = os.path.splitext(os.path.basename(output_file_path))[0]
-    #             json_filename = f"{base_name}_error.json"
-    #         else:
-    #             json_filename = None
-            
-    #         self._save_to_json(error_result, json_filename, "error_response")
-        
-    #     return error_result
