@@ -84,7 +84,6 @@ def main():
         # Exemplo: DOI encontrado: 10.1038/s41586-020-1234-5
     else:
         print("Nenhum DOI encontrado")
-    input()
     
     # Extract the cleaned text as a string for AI processing
     clean_text = pdf.get_cleaned_text()
