@@ -12,7 +12,7 @@ import json
 import re
 
 # ============================================
-# DEFINIÇÃO DOS SCHEMAS (Pydantic)
+# SCHEMA DEFINITIONS (Pydantic)
 # ============================================
 
 class Author(BaseModel):
@@ -61,7 +61,7 @@ class PaperAnalysis(BaseModel):
 
 
 # ============================================
-# CLASSE PRINCIPAL
+# MAIN CLASS
 # ============================================
 
 class StepFunAssistant:
@@ -125,7 +125,7 @@ class StepFunAssistant:
         self._setup_langchain()
     
     # ============================================
-    # Cnfiguration Methods.
+    # CONFIGURATION METHODS
     # ============================================
     
     def _validate_config(self):
@@ -230,7 +230,7 @@ class StepFunAssistant:
         self._format_instructions = format_instructions
     
     # ============================================
-    # MÉTODOS DE CRIAÇÃO DE MENSAGENS
+    # MESSAGE CREATION METHODS
     # ============================================
     
     def _create_messages(self, paper_text):
@@ -292,7 +292,7 @@ class StepFunAssistant:
         return result
     
     # ============================================
-    # MÉTODO PRINCIPAL
+    # MAIN METHOD
     # ============================================
     
     def ask_json(self, paper_text, doi=None, temperature=0.7, max_tokens=8000, 
@@ -359,7 +359,7 @@ class StepFunAssistant:
             return self._create_error_response(e, paper_text, doi, output_file_path, custom_filename, save_to_json)
     
     # ============================================
-    # MÉTODOS DE PARSE (FALLBACK)
+    # PARSE METHODS (FALLBACK)
     # ============================================
     
     def _manual_parse(self, response_content):
@@ -444,7 +444,7 @@ class StepFunAssistant:
         }
     
     # ============================================
-    # MÉTODOS DE METADADOS
+    # METADATA METHODS 
     # ============================================
     
     def _create_metadata(self, paper_text, temperature, max_tokens, output_file_path):
@@ -526,7 +526,7 @@ class StepFunAssistant:
         return metadata
     
     # ============================================
-    # MÉTODOS DE SALVAMENTO
+    #  SAVE METHOD 
     # ============================================
     
     def _save_to_json(self, data, filename=None, paper_name=None):
