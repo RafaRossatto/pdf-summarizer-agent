@@ -58,6 +58,11 @@ class PaperAnalysis(BaseModel):
     summary: dict = Field(
         description="Structured summary containing four required keys: 'objective' (research aim), 'methods' (methodology), 'results' (key findings), and 'conclusion' (main takeaways and implications)"
     )
+    
+    bibtex_citation: Optional[str] = Field(
+        description="Complete BibTeX entry string for this paper, properly formatted and ready to be copied to a .bib file. Example: '@article{silva2024title,\n  author = {Silva, J. and Santos, M.},\n  title = {Paper Title},\n  journal = {Journal Name},\n  year = {2024},\n  volume = {1},\n  number = {1},\n  pages = {1-10}\n}'",
+        default=None
+    )
 
 
 # ============================================
@@ -222,6 +227,23 @@ class StepFunAssistant:
     - Do not use markdown code blocks (like ```json)
     - If a field is not found in the paper, use null for strings or [] for lists
     - Each summary field (objective, methods, results, conclusion) should be 1-2 sentences
+    
+    For the 'bibtex_citation' field:
+    - Generate a COMPLETE and PROPERLY FORMATTED BibTeX entry
+    - Use the citation key pattern: FirstAuthorLastNameYYYY (e.g., 'silva2024')
+    - Include all available fields: author, title, journal, year, volume, pages, doi
+    - Format authors as: 'Last, First and Last, First'
+    - Preserve title case using double braces: title = {{Machine Learning for Science}}
+    - Example format:
+    @article{{silva2024machine}},
+    author = {{Silva, Joao and Santos, Maria}},
+    title = {{Machine Learning for Scientific Discovery}},
+    journal = {{Nature Machine Intelligence}},
+    year = {{2024}},
+    volume = {{6}},
+    pages = {{123-135}},
+    doi = {{10.1038/s42256-024-0082-1}}
+    }}
     """),
             
             ("user", "Extract information from this scientific paper:\n\n{paper_text}")  # ← "user" em vez de "human"
@@ -339,13 +361,14 @@ class StepFunAssistant:
             
             # Organize the final result
             organized_result = {
-                "title": parsed_result.get("title"),
-                "journal": parsed_result.get("journal"),
-                "publication_date": parsed_result.get("publication_date"),
-                "authors": parsed_result.get("authors", []),
-                "doi": doi,
-                "summary": parsed_result.get("summary", {}),
-                "_metadata": self._create_metadata(paper_text, temperature, max_tokens, output_file_path)
+            "title": parsed_result.get("title"),
+            "journal": parsed_result.get("journal"),
+            "publication_date": parsed_result.get("publication_date"),
+            "authors": parsed_result.get("authors", []),
+            "doi": doi,
+            "summary": parsed_result.get("summary", {}),
+            "bibtex_citation": parsed_result.get("bibtex_citation"),  # NOVO CAMPO (se usou versão simples)
+            "_metadata": self._create_metadata(paper_text, temperature, max_tokens, output_file_path)
             }
             
             # Save to file if requested
@@ -571,3 +594,45 @@ class StepFunAssistant:
         except Exception as e:
             print(f"❌ Error saving JSON: {e}")
             return None
+
+    # ============================================
+    # ERROR HANDLING METHODS
+    # ============================================
+
+    def _create_error_response(self, error, paper_text, doi, output_file_path, custom_filename, save_to_json):
+        """
+        Creates a structured error response when the analysis fails.
+        
+        Args:
+            error (Exception): The exception that occurred.
+            paper_text (str): The original paper text.
+            doi (str, optional): DOI of the paper.
+            output_file_path (str, optional): Original PDF file path.
+            custom_filename (str, optional): Custom filename for JSON output.
+            save_to_json (bool): Whether to save the result to a JSON file.
+        
+        Returns:
+            dict: A structured error response.
+        """
+        error_result = {
+            "title": None,
+            "journal": None,
+            "publication_date": None,
+            "authors": [],
+            "doi": doi,
+            "summary": {
+                "objective": None,
+                "methods": None,
+                "results": None,
+                "conclusion": None
+            },
+            "bibtex_citation": None,
+            "error": str(error),
+            "_metadata": self._create_metadata(paper_text, 0.7, 8000, output_file_path)
+        }
+        
+        # Save error response if requested
+        if save_to_json:
+            self._save_to_json(error_result, custom_filename, "error_result")
+        
+        return error_result
